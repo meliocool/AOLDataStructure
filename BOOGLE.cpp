@@ -1,6 +1,7 @@
 //MUHAMMAD DHITAN IMAM SAKTI
 //2702367183
 //AOL DATA STRUCTURE
+//REFERENCES BELOW THE MAIN OR AT THE BOTTOM OF THIS PAGE :)
 
 #include <stdio.h> //standard input output
 #include <stdlib.h> //for malloc
@@ -52,25 +53,28 @@ int seperator(char desc[]){
 	return wordCounter; //return the number of words counted
 }
 
+//i am not using boolean here, i thought since it wasn't taught by Mr Fadlan or my Algoprog Dosen in the 1st semester
+//i figured its prohibited to use stdbool
 int insertSlang(struct trie** root, char slangWord[], char desc[]){ //function to insert slang word, double pointer because it changes inside the function
 	if(*root == NULL){
 		*root = create_trie('$'); //if the root is NULL, it creates a trie with the topmost (root) being $
 	}
 	struct trie* temp = *root; //temporary variable to store the root
-	for(int i = 0; slangWord[i] != '\0'; i++){
-		if(temp->children[slangWord[i]] == NULL){
-			temp->children[slangWord[i]] = create_trie(slangWord[i]);
+	for(int i = 0; slangWord[i] != '\0'; i++){ 
+		if(temp->children[slangWord[i]] == NULL){ //traversing the trie and if the current children of the trie of the slangword character is NULL it exeecutes below
+			temp->children[slangWord[i]] = create_trie(slangWord[i]); //create a new node
 		}
-		temp = temp->children[slangWord[i]];
+		temp = temp->children[slangWord[i]]; //travel the trie into the next index of the slangWord
 	}
-	if(temp->finalChar){
-		strcpy(temp->description, desc);
+	if(temp->finalChar){ //if the last character is ALREADY flagged true meaning the word existed
+		strcpy(temp->description, desc); //copies the description of the given description in the parameter
 //        printf("Updated description of slang word: %s\n", slangWord); (only for debugging)
 //        printf("New Description: %s\n", temp->description); (only for debugging)
-		return 0;
+		return 0; //exits the loop
 	}
-	strcpy(temp->description, desc);
-	temp->finalChar = 1;
+	strcpy(temp->description, desc); //copies the description of the given description in the parameter
+	temp->finalChar = 1; //flag it to be true
+	
 //	printf("Inserted slang word: %s\n", slangWord); (only for debugging)
 //  printf("Description: %s\n", temp->description); (only for debugging)
     
@@ -107,8 +111,8 @@ void releaseNewSlang(struct trie** root){
 			}
 		}
 		
-		//STRTOK CANNOT BE USED HERE BECAUSE THE SPACES IN THE STRING WOULD BE REPLACED WITH '\0' 
-		//AND THEREFORE CANNOT BE PRINTED NOR UPDATED :D
+		//STRTOK CANNOT BE USED HERE BECAUSE THE SPACES IN THE STRING WOULD BE REPLACED WITH '\0' T-T
+		//AND THEREFORE CANNOT BE PRINTED NOR UPDATED :/
 		
 		//insertSlang function called to actually insert the slang word
 		int hasBeenInserted = insertSlang(root, slangWord, desc); 
@@ -121,7 +125,7 @@ void releaseNewSlang(struct trie** root){
 			printf("Successfully updated the description of the given Slang Word!\n");
 		}
 		//well i personally kinda like this one more than press enter to continue so yea :)
-		printf("Do you wish to continue? (y/n) ");
+		printf("Do you wish to continue releasing? (y/n) ");
 		scanf(" %c", &destiny);
 		getchar();
 		
@@ -135,9 +139,131 @@ void releaseNewSlang(struct trie** root){
 	} while(destiny != 'n'); //continues the loop as long as the user doesnt input n for the destiny
 }
 
-struct trie* searchSlang();
+void searchSlangFunction(struct trie* root){
+	char toBeSearched[256];
+	char destiny;
+	if (root == NULL) { //check first if the root is null
+        printf("Sorry, the list is currently empty!\n");
+		printf("\nPress enter to go back to main menu..."); //if the user presses enter it goes back to the main menu
+		getchar();
+		system("cls"); //clears the screen
+		return;
+    }
+	do {
+		int valid = 0; //valid flag, initially set to 0
+		while(!valid){ //while loop
+			printf("Enter a new Slang Word to be searched [Must be more than 1 characters and contains no space]: ");
+			scanf(" %[^\n]", toBeSearched); //input for the slang word
+			int length = strlen(toBeSearched); //strlen to find the length of the slang word
+			if(length > 1 && strchr(toBeSearched, ' ') == NULL){ //length is more than 1 characters and there is no space
+				valid = 1; //set the flag to 1 to exit the loop, slang word has been validated
+			} else {
+				valid = 0; //set the flag to 0 to continue the loop (asking for a new slang word)
+			}
+		}
+		int found = 1; //initially set to found
+		struct trie* temp = root; //temporary variable to store the root
+		for(int i = 0; toBeSearched[i] != '\0'; i++){ 
+			if(temp->children[toBeSearched[i]] == NULL){ //traversing the trie and if the current children of the trie of the slangword character is NULL it executes the code below
+				found = 0; //set the flag to 0 if its not found
+				break; //exits the loop
+			} 
+			temp = temp->children[toBeSearched[i]]; //travel the trie into the next index of the slangWord
+		}
+		if(found == 1){ //if found is flagged as 1 it simply prints the found slang word and its description
+			printf("\nWord found!\n");
+			printf("\n");
+			printf("Slang Word: %s\n", toBeSearched); //prints the slang word
+			printf("Description: %s\n", temp->description); //prints the description
+		} else {
+			printf("\nThere is no slang word \"%s\" in the Dictionary\n", toBeSearched); //if found is flagged as 0 (not found) it prints this
+		}
+		
+		//just another prompt
+		printf("\nDo you wish to continue? (y/n) ");
+		scanf(" %c", &destiny);
+		getchar();
+		
+		//both clears the screen for aestethic purposes
+		if(destiny == 'y'){
+			system("cls");
+		} else {
+			system("cls");
+		}
+	} while (destiny != 'n');
+}
 
-struct trie* searchSlangPrefix();
+//void printSlangWordsWithPrefixUtil(struct trie* root, char prefix[]){
+//	if (root->finalChar) {
+//	    printf("%s\n", prefix);
+//	}
+//	    // Recursively traverse all children nodes
+//	for (int i = 0; i < 256; i++) {
+//	if (root->children[i] != NULL) {
+//	    char newPrefix[strlen(prefix) + 2]; // +2 for the new character and null terminator
+//	    strcpy(newPrefix, prefix);
+//	    newPrefix[strlen(prefix)] = i;
+//	    newPrefix[strlen(prefix) + 1] = '\0'; // Null-terminate the string
+//	    printSlangWordsWithPrefixUtil(root->children[i], newPrefix);
+//	    }
+//	}
+//}
+
+void searchPrefixRec(struct trie* root, char prefix[]){
+	if(root->finalChar){
+		printf("%s\n", prefix);
+	}
+	for(int i = 0; i < 256; i++) {
+        if(root->children[i] != NULL) {
+            char new_prefix[256];
+            strcpy(new_prefix, prefix);
+            new_prefix[strlen(prefix)] = i + 'a'; //append the character to the prefix
+            new_prefix[strlen(prefix) + 1] = '\0'; 
+            searchPrefixRec(root->children[i], new_prefix);
+        }
+    }
+}
+
+void searchSlangPrefix(struct trie* root){
+	char prefix[256];
+	char destiny;
+	if (root == NULL) { //check first if the root is null
+        printf("Sorry, the list is currently empty!\n");
+		printf("\nPress enter to go back to main menu..."); //if the user presses enter it goes back to the main menu
+		getchar();
+		system("cls"); //clears the screen
+		return;
+    }
+    do {
+    	printf("Enter a prefix to be searched: ");
+    	scanf("%s", prefix);
+    	struct trie* temp = root;
+    	int found = 1;
+    	int length = strlen(prefix);
+    	for(int i = 0; i < length; i++){
+    		if(temp->children[prefix[i]] == NULL){ //traversing the trie and if the current children of the trie of the slangword character is NULL it executes the code below
+				found = 0; //set the flag to 0 if its not found
+				break; //exits the loop
+			}
+			temp = temp->children[prefix[i]];
+		}
+		if(found == 1){
+			searchPrefixRec(root, prefix);
+		} else {
+			printf("\nThere is no prefix \"%s\" in the Dictionary\n", prefix);
+		}
+		printf("\nDo you wish to continue? (y/n) ");
+		scanf(" %c", &destiny);
+		getchar();
+		
+		//both clears the screen for aestethic purposes
+		if(destiny == 'y'){
+			system("cls");
+		} else {
+			system("cls");
+		}
+	} while (destiny != 'n');
+}
 
 //THIS FUNCTION IS ONLY FOR DEBUGGING PURPOSES 
 void printWithDescRec(struct trie* root, char* temp, int depth, char desc[], int* numberOfSlangs){
@@ -154,14 +280,14 @@ void printWithDescRec(struct trie* root, char* temp, int depth, char desc[], int
 	}
 }
 
-//THIS FUNCTION IS ONLY FOR DEBUGGING PURPOSES 
+//THIS FUNCTION IS ONLY FOR DEBUGGING PURPOSES
 void printWithDesc(struct trie* root){
 	char destiny;
 	printf("List of all Slang Words available in the Dictionary: \n");
-	char temp[256]; //temp declaration
-	int numberOfSlangs = 1; //number starts at 1
+	char temp[256]; 
+	int numberOfSlangs = 1; 
 	
-	printWithDescRec(root, temp, 0, root->description, &numberOfSlangs); //recursive printing function called
+	printWithDescRec(root, temp, 0, root->description, &numberOfSlangs); 
 	
 	printf("Do you wish to continue? (y/n) ");
 	scanf(" %c", &destiny);
@@ -180,34 +306,36 @@ void printAllSlangRec(struct trie* root, char* temp, int depth, int* numberOfSla
 		printf("Dictionary is empty\n"); //if the root is null then the dictionary is empty
 		return; //return
 	}
-	if(root->finalChar){ //if the root
-		temp[depth] = '\0'; 
-		printf("%d. %s\n", (*numberOfSlangs), temp);
-		(*numberOfSlangs)++;
+	if(root->finalChar){ //if its the final char (last char)
+		temp[depth] = '\0'; //set the current index of temp to be null terminator
+		printf("%d. %s\n", (*numberOfSlangs), temp); //prints out the temp, basically the characters it takes to get to finalChar
+		(*numberOfSlangs)++; //adds 1 to the number of slangs
 	}
 	for(int i = 0; i < 256; i++){
-		if(root->children[i] != NULL){
-			temp[depth] = i;
-			printAllSlangRec(root->children[i], temp, depth + 1, numberOfSlangs);
+		if(root->children[i] != NULL){ //if the current child index is NOT NULL
+			temp[depth] = i; //the current index of temp is now set to whatever i is
+			printAllSlangRec(root->children[i], temp, depth + 1, numberOfSlangs); //recursive call
 		}
 	}
 }
 
 void printAllSlang(struct trie* root){
 	if(root != NULL){
-		printf("List of all Slang Words available in the Dictionary: \n");	
+		printf("List of all Slang Words available in the Dictionary: \n");	//just a starting statement before the slangs are listed
 	}
 	
-	char destiny;
-	char temp[256]; //temp declaration
-	int numberOfSlangs = 1; //number starts at 1
+	char destiny; //destiny declaration
+	char temp[256]; //temp declaration to traverse the trie
+	int numberOfSlangs = 1; //numbering for the slang list starts at 1
 	
 	printAllSlangRec(root, temp, 0, &numberOfSlangs); //recursive printing function called
 	
+	//again, i like this better than Press Enter to Continue...
 	printf("Do you wish to continue? (y/n) ");
 	scanf(" %c", &destiny);
 	getchar();
 	
+	//clear window for aestethic
 	if(destiny == 'y'){
 		system("cls");
 	} else {
@@ -231,9 +359,11 @@ int main (){
 				break;
 			case 2: //if the user chooses 2
 				system("cls");
+				searchSlangFunction(root);
 				break;
 			case 3: //if the user chooses 3
 				system("cls");
+				searchSlangPrefix(root);
 				break;
 			case 4: //if the user chooses 4
 				system("cls");
@@ -241,7 +371,7 @@ int main (){
 				break;
 			case 5: //if the user chooses to exit the program
 				system("cls");
-				printf("Thank you for using BOOGLE!!!");
+				printf("Thank you for using BOOGLE!!!"); //exit message
 				break;
 			default:
                 printf("Invalid choice! Please choose a valid option.\n"); //default message
@@ -257,3 +387,19 @@ int main (){
 	} while(input != 5);	
 	return 0;
 }
+
+//REFERENCES
+//----------------------------------------------------------------------------------------------------------------------
+//YOUTUBE                                                                                                              
+//https://youtu.be/3CbFFVHQrk4?si=_Hv8KPlv5iF9LOSR : The Trie Data Structure (Prefix Tree) BY - Jacob Sorber           
+//https://youtu.be/NDfAYZCHstI?si=QFqh0FVe0nUnPfTd : The Trie Data Structure, Part 2 (search, delete) BY - Jacob Sorber
+//https://youtu.be/qA8l8TAMyig?si=4Ex0WlGcZQiOJSdQ : Trie data structure - Inside code BY - Inside Code
+
+//GEEKFORGEEKS
+//https://www.geeksforgeeks.org/trie-insert-and-search/
+
+//STACK OVERFLOW
+//https://stackoverflow.com/questions/64821476/trie-mechanism-in-c
+
+//MAAF APABILA MASIH ADA KEKURANGAN PAK 
+//TERIMA KASIH PAK FADLAN :D
