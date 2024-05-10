@@ -1,7 +1,7 @@
 //MUHAMMAD DHITAN IMAM SAKTI
 //2702367183
 //AOL DATA STRUCTURE
-//REFERENCES BELOW THE MAIN OR AT THE BOTTOM OF THIS PAGE :)
+//REFERENCES BELOW THE MAIN OR AT THE BOTTOM OF THIS PAGE :D
 
 #include <stdio.h> //standard input output
 #include <stdlib.h> //for malloc
@@ -68,11 +68,14 @@ int insertSlang(struct trie** root, char slangWord[], char desc[]){ //function t
 	}
 	if(temp->finalChar){ //if the last character is ALREADY flagged true meaning the word existed
 		strcpy(temp->description, desc); //copies the description of the given description in the parameter
+		
 //        printf("Updated description of slang word: %s\n", slangWord); (only for debugging)
 //        printf("New Description: %s\n", temp->description); (only for debugging)
+
 		return 0; //exits the loop
 	}
 	strcpy(temp->description, desc); //copies the description of the given description in the parameter
+	
 	temp->finalChar = 1; //flag it to be true
 	
 //	printf("Inserted slang word: %s\n", slangWord); (only for debugging)
@@ -89,8 +92,10 @@ void releaseNewSlang(struct trie** root){
 	do {
 		int valid = 0; //valid flag, initially set to 0
 		while(!valid){ //while loop
+		
 			printf("Enter a new Slang Word [Must be more than 1 characters and contains no space]: ");
 			scanf(" %[^\n]", slangWord); //input for the slang word
+			
 			int length = strlen(slangWord); //strlen to find the length of the slang word
 			if(length > 1 && strchr(slangWord, ' ') == NULL){ //length is more than 1 characters and there is no space
 				valid = 1; //set the flag to 1 to exit the loop, slang word has been validated
@@ -103,7 +108,6 @@ void releaseNewSlang(struct trie** root){
 			printf("Enter a new Slang Word Description [Must be more than 2 words]: ");
         	scanf(" %[^\n]", desc);  // input for the slang word description with spaces
 			int counter = seperator(desc); //calls the seperator function and store the value it returns to counter
-//			printf("word counter: %d\n", counter); (debugging purposes)
 			if(counter > 2){
 				valid2 = 1; //set the flag to 1 exiting the loop, same as above :)
 			} else {
@@ -152,8 +156,10 @@ void searchSlangFunction(struct trie* root){
 	do {
 		int valid = 0; //valid flag, initially set to 0
 		while(!valid){ //while loop
+		
 			printf("Enter a new Slang Word to be searched [Must be more than 1 characters and contains no space]: ");
 			scanf(" %[^\n]", toBeSearched); //input for the slang word
+			
 			int length = strlen(toBeSearched); //strlen to find the length of the slang word
 			if(length > 1 && strchr(toBeSearched, ' ') == NULL){ //length is more than 1 characters and there is no space
 				valid = 1; //set the flag to 1 to exit the loop, slang word has been validated
@@ -193,33 +199,17 @@ void searchSlangFunction(struct trie* root){
 	} while (destiny != 'n');
 }
 
-//void printSlangWordsWithPrefixUtil(struct trie* root, char prefix[]){
-//	if (root->finalChar) {
-//	    printf("%s\n", prefix);
-//	}
-//	    // Recursively traverse all children nodes
-//	for (int i = 0; i < 256; i++) {
-//	if (root->children[i] != NULL) {
-//	    char newPrefix[strlen(prefix) + 2]; // +2 for the new character and null terminator
-//	    strcpy(newPrefix, prefix);
-//	    newPrefix[strlen(prefix)] = i;
-//	    newPrefix[strlen(prefix) + 1] = '\0'; // Null-terminate the string
-//	    printSlangWordsWithPrefixUtil(root->children[i], newPrefix);
-//	    }
-//	}
-//}
-
-void searchPrefixRec(struct trie* root, char prefix[]){
-	if(root->finalChar){
-		printf("%s\n", prefix);
-	}
-	for(int i = 0; i < 256; i++) {
-        if(root->children[i] != NULL) {
-            char new_prefix[256];
-            strcpy(new_prefix, prefix);
-            new_prefix[strlen(prefix)] = i + 'a'; //append the character to the prefix
-            new_prefix[strlen(prefix) + 1] = '\0'; 
-            searchPrefixRec(root->children[i], new_prefix);
+void searchPrefixRec(struct trie* root, char prefix[], int level, int* numberOfSlangs){
+	if (root->finalChar && level > 0) {
+        prefix[level] = '\0'; // adds null terminator at the end
+        printf("%d. %s\n", (*numberOfSlangs), prefix); //prints each slang words that starts with the prefix after appending
+        (*numberOfSlangs)++; //increments the number of slangs as it continues printing
+    }
+    for (int i = 0; i < 256; i++) {
+        if (root->children[i] != NULL) { //if the current children is not NULL
+            prefix[level] = i; // appending the prefix with the character that is found in each node
+            searchPrefixRec(root->children[i], prefix, level + 1, numberOfSlangs); //recursively calls the function again
+    		prefix[level] = '\0'; //adds null terminator to end the string
         }
     }
 }
@@ -237,67 +227,39 @@ void searchSlangPrefix(struct trie* root){
     do {
     	printf("Enter a prefix to be searched: ");
     	scanf("%s", prefix);
-    	struct trie* temp = root;
-    	int found = 1;
-    	int length = strlen(prefix);
-    	for(int i = 0; i < length; i++){
-    		if(temp->children[prefix[i]] == NULL){ //traversing the trie and if the current children of the trie of the slangword character is NULL it executes the code below
-				found = 0; //set the flag to 0 if its not found
-				break; //exits the loop
-			}
-			temp = temp->children[prefix[i]];
-		}
-		if(found == 1){
-			searchPrefixRec(root, prefix);
-		} else {
-			printf("\nThere is no prefix \"%s\" in the Dictionary\n", prefix);
-		}
+    	
+		struct trie* temp = root; //store the root inside a temp variable to traverse the trie
+        int length = strlen(prefix); //find out the length of the prefix
+        int found = 1; //intially set to 1 (found)
+        
+        for (int i = 0; i < length; i++) {
+            if (temp->children[prefix[i]] == NULL) { //travels the trie
+                found = 0; //found is set to 0 because well its not found
+                break;
+            } else {
+                    temp = temp->children[prefix[i]]; // Move to the next node
+            }
+        }
+        
+        if (found == 1) {
+            int numberOfSlangs = 1; //for the numbers of slang words
+            printf("\nSlang Words that starts with \"%s\":\n", prefix); //just a intro
+            searchPrefixRec(temp, prefix, length, &numberOfSlangs); // Start searching from the node corresponding to the last character of the prefix
+        } else {
+            printf("\nThere is no prefix \"%s\" in the Dictionary\n", prefix); //if there is no word that starts with the prefix
+        }
+		
 		printf("\nDo you wish to continue? (y/n) ");
 		scanf(" %c", &destiny);
 		getchar();
 		
-		//both clears the screen for aestethic purposes
+		//both clears the screen for aesthetic purposes
 		if(destiny == 'y'){
 			system("cls");
 		} else {
 			system("cls");
 		}
 	} while (destiny != 'n');
-}
-
-//THIS FUNCTION IS ONLY FOR DEBUGGING PURPOSES 
-void printWithDescRec(struct trie* root, char* temp, int depth, char desc[], int* numberOfSlangs){
-	if(root->finalChar){
-		temp[depth] = '\0'; 
-		printf("%d. %s: %s\n", (*numberOfSlangs), temp, desc);
-		(*numberOfSlangs)++;
-	}
-	for(int i = 0; i < 256; i++){
-		if(root->children[i] != NULL){
-			temp[depth] = i;
-			printWithDescRec(root->children[i], temp, depth + 1, root->children[i]->description, numberOfSlangs);
-		}
-	}
-}
-
-//THIS FUNCTION IS ONLY FOR DEBUGGING PURPOSES
-void printWithDesc(struct trie* root){
-	char destiny;
-	printf("List of all Slang Words available in the Dictionary: \n");
-	char temp[256]; 
-	int numberOfSlangs = 1; 
-	
-	printWithDescRec(root, temp, 0, root->description, &numberOfSlangs); 
-	
-	printf("Do you wish to continue? (y/n) ");
-	scanf(" %c", &destiny);
-	getchar();
-	
-	if(destiny == 'y'){
-		system("cls");
-	} else {
-		system("cls");
-	}
 }
 
 //print all slang recursive function, the ones with pointers are constantly changing
@@ -335,7 +297,7 @@ void printAllSlang(struct trie* root){
 	scanf(" %c", &destiny);
 	getchar();
 	
-	//clear window for aestethic
+	//clear window for aesthetic
 	if(destiny == 'y'){
 		system("cls");
 	} else {
@@ -388,18 +350,21 @@ int main (){
 	return 0;
 }
 
-//REFERENCES
-//----------------------------------------------------------------------------------------------------------------------
-//YOUTUBE                                                                                                              
-//https://youtu.be/3CbFFVHQrk4?si=_Hv8KPlv5iF9LOSR : The Trie Data Structure (Prefix Tree) BY - Jacob Sorber           
-//https://youtu.be/NDfAYZCHstI?si=QFqh0FVe0nUnPfTd : The Trie Data Structure, Part 2 (search, delete) BY - Jacob Sorber
-//https://youtu.be/qA8l8TAMyig?si=4Ex0WlGcZQiOJSdQ : Trie data structure - Inside code BY - Inside Code
+// REFERENCES
+// ----------------------------------------------------------------------------------------------------------------------
+// YOUTUBE                                                                                                              
+// https://youtu.be/3CbFFVHQrk4?si=_Hv8KPlv5iF9LOSR : The Trie Data Structure (Prefix Tree) BY - Jacob Sorber           
+// https://youtu.be/NDfAYZCHstI?si=QFqh0FVe0nUnPfTd : The Trie Data Structure, Part 2 (search, delete) BY - Jacob Sorber
+// https://youtu.be/qA8l8TAMyig?si=4Ex0WlGcZQiOJSdQ : Trie data structure - Inside code BY - Inside Code
 
-//GEEKFORGEEKS
-//https://www.geeksforgeeks.org/trie-insert-and-search/
+// GEEKFORGEEKS
+// https://www.geeksforgeeks.org/trie-insert-and-search/
 
-//STACK OVERFLOW
-//https://stackoverflow.com/questions/64821476/trie-mechanism-in-c
+// STACK OVERFLOW
+// https://stackoverflow.com/questions/64821476/trie-mechanism-in-c
 
-//MAAF APABILA MASIH ADA KEKURANGAN PAK 
-//TERIMA KASIH PAK FADLAN :D
+// BAELDUNG.COM
+// https://www.baeldung.com/cs/tries-prefix-trees
+
+// MAAF APABILA MASIH ADA KEKURANGAN PAK 
+// TERIMA KASIH PAK FADLAN :D
